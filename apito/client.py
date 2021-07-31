@@ -49,10 +49,11 @@ class Apito:
         }
 
         response = self.client.get(url, headers=headers, params=params)
-
-        response_model = SearchAnswer(**response.json())
-
-        return response_model
+        if response.status_code == 200:
+            response_model = SearchAnswer(**response.json())
+            return response_model
+        else:
+            raise ValueError(f"{response.status_code} - {response.text}")
 
     def item_contact_phone(self, item_id: int, cookies: str = None):
         if self.__cookies or cookies:
