@@ -1,7 +1,7 @@
 import urllib.parse
 from typing import Union
 
-from httpx import Client
+from httpx import AsyncClient
 
 from apito.models.phone import PhoneInfo
 from apito.models.search import SearchAnswer
@@ -16,10 +16,10 @@ class Apito:
     @property
     def client(self):
         if not self.__client:
-            self.__client = Client()
+            self.__client = AsyncClient()
         return self.__client
 
-    def search(self, query: str, location_id: Union[str, int] = 640860, search_radius: int = 0):
+    async def search(self, query: str, location_id: Union[str, int] = 640860, search_radius: int = 0):
         url = "https://m.avito.ru/api/11/items"
 
         params = {
@@ -46,7 +46,7 @@ class Apito:
             'TE': 'trailers'
         }
 
-        response = self.client.get(url, headers=headers, params=params)
+        response = await self.client.get(url, headers=headers, params=params)
         if response.status_code == 200:
             response_model = SearchAnswer(**response.json())
             return response_model
@@ -72,7 +72,7 @@ class Apito:
                 'Cookie': self.__cookies or cookies
             }
 
-            response = self.client.get(url, headers=headers)
+            response = await self.client.get(url, headers=headers)
 
             if response.status_code == 200:
                 response_json = response.json()
