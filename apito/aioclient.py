@@ -7,7 +7,7 @@ from apito.models.phone import PhoneInfo
 from apito.models.search import SearchAnswer
 
 
-class Apito:
+class Aiopito:
     def __init__(self, cookies: str = None):
         self.__client = None
         self.__cookies = cookies
