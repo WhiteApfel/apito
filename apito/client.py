@@ -21,6 +21,7 @@ class Apito:
 
     def search_generator(self,
                          query: str,
+                         cookies: str = None,
                          location_id: Union[str, int] = 640860,
                          search_radius: int = 0,
                          start_page: int = 1,
@@ -30,7 +31,7 @@ class Apito:
         ya_zhe_kto_to_drugoy_drugogo_tsveta_dazhe = True
 
         while ya_zhe_kto_to_drugoy_drugogo_tsveta_dazhe:
-            res = self.search(query, location_id, search_radius, start_page, only_items=True)
+            res = self.search(query, cookies, location_id, search_radius, start_page)
 
             if res.status == 'ok' and len(res.result.items):
                 start_page += 1
@@ -58,7 +59,7 @@ class Apito:
             else:
                 ya_zhe_kto_to_drugoy_drugogo_tsveta_dazhe = False
 
-    def search(self, query: str, location_id: Union[str, int] = 640860, search_radius: int = 0, page: int = 0, only_items: bool = False):
+    def search(self, query: str, cookies: str = None, location_id: Union[str, int] = 640860, search_radius: int = 0, page: int = 0):
         url = "https://m.avito.ru/api/11/items"
 
         params = {
@@ -84,6 +85,8 @@ class Apito:
             'Cache-Control': 'no-cache',
             'TE': 'trailers',
         }
+        if cookies:
+            headers['Cookie'] = cookies
 
         response = self.client.get(url, headers=headers, params=params)
         if response.status_code == 200:
