@@ -14,7 +14,7 @@ def requirements():
 
 setup(
     name='apito',
-    version='0.4.1',
+    version='0.4.2',
     packages=['apito', 'apito.models'],
     url='https://github.com/WhiteApfel/apito',
     license='MPL 2.0',

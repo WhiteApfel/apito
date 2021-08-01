@@ -1,3 +1,4 @@
 httpx~=0.18.2
 typing~=3.7.4.3
 pydantic~=1.8.2
+httpx_socks[asyncio]~=0.4.1
