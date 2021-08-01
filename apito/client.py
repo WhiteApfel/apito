@@ -2,6 +2,7 @@ import urllib.parse
 from typing import Union
 
 from httpx import Client
+from httpx_socks import SyncProxyTransport
 
 from apito.models.phone import PhoneInfo
 from apito.models.search import SearchAnswer
@@ -26,12 +27,13 @@ class Apito:
                          search_radius: int = 0,
                          start_page: int = 1,
                          stack: bool = False,
-                         stop_me_noooow: bool = True):
+                         stop_me_noooow: bool = True,
+                         proxy: str = None):
 
         ya_zhe_kto_to_drugoy_drugogo_tsveta_dazhe = True
 
         while ya_zhe_kto_to_drugoy_drugogo_tsveta_dazhe:
-            res = self.search(query, cookies, location_id, search_radius, start_page)
+            res = self.search(query, cookies, location_id, search_radius, start_page, proxy)
 
             if res.status == 'ok' and len(res.result.items):
                 start_page += 1
@@ -59,7 +61,7 @@ class Apito:
             else:
                 ya_zhe_kto_to_drugoy_drugogo_tsveta_dazhe = False
 
-    def search(self, query: str, cookies: str = None, location_id: Union[str, int] = 640860, search_radius: int = 0, page: int = 0):
+    def search(self, query: str, cookies: str = None, location_id: Union[str, int] = 640860, search_radius: int = 0, page: int = 0, proxy: str = None):
         url = "https://m.avito.ru/api/11/items"
 
         params = {
@@ -88,7 +90,12 @@ class Apito:
         if cookies:
             headers['Cookie'] = cookies
 
-        response = self.client.get(url, headers=headers, params=params)
+        if proxy:
+            transport = SyncProxyTransport.from_url(proxy)
+            with Client(transport=transport) as client:
+                response = client.get(url, headers=headers, params=params)
+        else:
+            response = self.client.get(url, headers=headers, params=params)
         if response.status_code == 200:
             data = response.json()
             response_model = SearchAnswer(**data)
@@ -96,7 +103,7 @@ class Apito:
         else:
             raise ValueError(f"{response.status_code} - {response.text}")
 
-    def item_contact_phone(self, item_id: int, cookies: str = None):
+    def item_contact_phone(self, item_id: int, cookies: str = None, proxy: str = None):
         if self.__cookies or cookies:
             url = f"https://m.avito.ru/api/1/items/{item_id}/phone?key={self.__key}"
             headers = {
@@ -114,8 +121,12 @@ class Apito:
                 'Cache-Control': 'no-cache',
                 'Cookie': self.__cookies or cookies
             }
-
-            response = self.client.get(url, headers=headers)
+            if proxy:
+                transport = SyncProxyTransport.from_url(proxy)
+                with Client(transport=transport) as client:
+                    response = client.get(url, headers=headers)
+            else:
+                response = self.client.get(url, headers=headers)
 
             if response.status_code == 200:
                 response_json = response.json()
