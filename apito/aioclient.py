@@ -103,7 +103,7 @@ class Aiopito:
         else:
             raise ValueError(f"{response.status_code} - {response.text}")
 
-    def item_contact_phone(self, item_id: int, cookies: str = None, proxy: str = None):
+    async def item_contact_phone(self, item_id: int, cookies: str = None, proxy: str = None):
         if self.__cookies or cookies:
             url = f"https://m.avito.ru/api/1/items/{item_id}/phone?key={self.__key}"
             headers = {
