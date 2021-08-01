@@ -24,11 +24,35 @@ class ItemValue(BaseModel):
     address: str
     coords: ItemCoordinates
     uri: str = Field(...,  alias="uri_mweb")
+    description: str = Field('')
+
+
+class SearchItemValueItemFigni(BaseModel):
+    type: str
+    value: ItemValue
+
+
+class SearchItemValueFigni(BaseModel):
+    list: list[SearchItemValueItemFigni]
+
+
+class SearchItemFigni(BaseModel):
+    type: str
+    value: SearchItemValueFigni
 
 
 class SearchItem(BaseModel):
-    type: str
+    type: Literal['item', 'xlItem']
     value: ItemValue
+
+
+class GroupTitleItemValue(BaseModel):
+    title: str
+
+
+class GroupTitleItem(BaseModel):
+    type: str
+    value: GroupTitleItemValue
 
 
 class SearchResult(BaseModel):
@@ -37,7 +61,7 @@ class SearchResult(BaseModel):
     total_count: int = Field(..., alias='totalCount')
     main_count: int = Field(..., alias='mainCount')
     last_stamp: int = Field(..., alias='lastStamp')
-    items: list[SearchItem]
+    items: list[Union[SearchItem, SearchItemFigni, GroupTitleItem]]
 
 
 class SearchError(BaseModel):

@@ -19,7 +19,46 @@ class Apito:
             self.__client = Client()
         return self.__client
 
-    def search(self, query: str, location_id: Union[str, int] = 640860, search_radius: int = 0):
+    def search_generator(self,
+                         query: str,
+                         location_id: Union[str, int] = 640860,
+                         search_radius: int = 0,
+                         start_page: int = 1,
+                         stack: bool = False,
+                         stop_me_noooow: bool = True):
+
+        ya_zhe_kto_to_drugoy_drugogo_tsveta_dazhe = True
+
+        while ya_zhe_kto_to_drugoy_drugogo_tsveta_dazhe:
+            res = self.search(query, location_id, search_radius, start_page, only_items=True)
+
+            if res.status == 'ok' and len(res.result.items):
+                start_page += 1
+
+                if stop_me_noooow:
+                    to_yield = []
+
+                    for item in res.result.items:
+                        if item.type != 'groupTitle':
+                            if not stack:
+                                yield item
+                            else:
+                                to_yield.append(item)
+                        else:
+                            ya_zhe_kto_to_drugoy_drugogo_tsveta_dazhe = False
+                            break
+
+                    if not stack:
+                        yield to_yield
+
+                else:
+                    to_yield = [i for i in res.result.items if i.type != 'groupTitle']
+                    yield to_yield
+
+            else:
+                ya_zhe_kto_to_drugoy_drugogo_tsveta_dazhe = False
+
+    def search(self, query: str, location_id: Union[str, int] = 640860, search_radius: int = 0, page: int = 0, only_items: bool = False):
         url = "https://m.avito.ru/api/11/items"
 
         params = {
@@ -27,7 +66,7 @@ class Apito:
             "query": query,
             "locationId": location_id,
             "searchRadius": search_radius,
-            "page": 1,
+            "page": page,
             "display": "list",
             "limit": 30
         }
@@ -43,12 +82,13 @@ class Apito:
             'Sec-Fetch-Site': 'same-origin',
             'Pragma': 'no-cache',
             'Cache-Control': 'no-cache',
-            'TE': 'trailers'
+            'TE': 'trailers',
         }
 
         response = self.client.get(url, headers=headers, params=params)
         if response.status_code == 200:
-            response_model = SearchAnswer(**response.json())
+            data = response.json()
+            response_model = SearchAnswer(**data)
             return response_model
         else:
             raise ValueError(f"{response.status_code} - {response.text}")
@@ -77,7 +117,7 @@ class Apito:
             if response.status_code == 200:
                 response_json = response.json()
                 if response_json['status'] == 'ok':
-                    phone = urllib.parse.unquote(response['result']['action']['uri'].split('=')[-1])
+                    phone = urllib.parse.unquote(response_json['result']['action']['uri'].split('=')[-1])
                     return PhoneInfo(success=True, phone=phone, message=None)
                 elif response_json['status'] == 'bad-request':
                     message = response_json['result']['message']
@@ -87,4 +127,3 @@ class Apito:
                 message = f"{response.status_code} - {response.text}"
             return PhoneInfo(success=False, phone=None, message=message)
         raise ValueError('No cookies were specified when the class was initialized or when the method was called.')
-
