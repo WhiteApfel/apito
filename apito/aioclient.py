@@ -141,4 +141,3 @@ class Aiopito:
                 message = f"{response.status_code} - {response.text}"
             return PhoneInfo(success=False, phone=None, message=message)
         raise ValueError('No cookies were specified when the class was initialized or when the method was called.')
-
