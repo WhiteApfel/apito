@@ -100,8 +100,7 @@ class Apito:
             data = response.json()
             response_model = SearchAnswer(**data)
             return response_model
-        else:
-            raise ValueError(f"{response.status_code} - {response.text}")
+        raise ValueError(f"{response.status_code} - {response.text}")
 
     def item_contact_phone(self, item_id: int, cookies: str = None, proxy: str = None):
         if self.__cookies or cookies:
@@ -133,7 +132,7 @@ class Apito:
                 if response_json['status'] == 'ok':
                     phone = urllib.parse.unquote(response_json['result']['action']['uri'].split('=')[-1])
                     return PhoneInfo(success=True, phone=phone, message=None)
-                elif response_json['status'] == 'bad-request':
+                if response_json['status'] == 'bad-request':
                     message = response_json['result']['message']
                 else:
                     message = 'Unsuccessful'
