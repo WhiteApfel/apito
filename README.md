@@ -17,9 +17,12 @@ python setup.py install
 ## How to use
 
 ```python
+import asyncio
 from apito import Apito, Aiopito
 
-a = Apito()  # Aiopito -- async
+# sync
+
+a = Apito()
 
 response = a.search('Моё сердечко', proxy="socks5://ya_slovno:vys0hsHaYa@luzha:2005")
 
@@ -33,4 +36,18 @@ results = a.search_generator("Упущенные возможности")
 
 for item in results:
     print(f"{item.value.title} #{item.value.id}")
+
+# async
+
+a = Aiopito()
+
+
+async def main():
+    print((await a.search("Носочки для новорождённых")).result.count)
+
+    async for x in a.search_generator("Носочки для новорождённых"):
+        print(x)
+
+
+asyncio.run(main())
 ```
